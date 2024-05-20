@@ -20,11 +20,9 @@ cp -a sv/zramen /etc/sv
 
 - awk
 - bash
-- bc
 - coreutils
 - grep
 - kmod
-- procps-ng
 - util-linux
 
 ## See Also
