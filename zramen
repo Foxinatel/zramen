@@ -21,7 +21,6 @@ readonly ZRAM_SIZE="${ZRAM_SIZE:-$SIZE}"
 
 # sets max size of zram in MiB
 readonly MAX_SIZE=4096
-readonly ZRAM_MAX_SIZE="${ZRAM_MAX_SIZE:-$MAX_SIZE}"
 
 # set the maximum number of compression streams for zram
 readonly STREAMS=$(nproc)
@@ -57,7 +56,7 @@ Options:
   -n, --num        Number of compression streams for zram (Default: $ZRAM_STREAMS)
   -p, --priority   Priority of zram swap device (Default: $ZRAM_PRIORITY)
   -s, --size       Percentage of memory to allocate for zram (Default: $ZRAM_SIZE)
-  -m, --max-size   Maximum size of zram in MiB (Default: $ZRAM_MAX_SIZE)
+  -m, --max-size   Maximum size of zram in MiB (optional)
 
 Commands:
   make        Make zram swap device
@@ -178,10 +177,13 @@ _size=${_size:-$ZRAM_SIZE}
 [[ $_size -le 250 ]] \
   || _size=250
 
-# sanitize max size input
-_max_size=${_max_size:-$ZRAM_MAX_SIZE}
-[[ $_max_size -gt 0 ]] \
-  || _max_size=$MAX_SIZE
+# sanitize max size input and mark seen if applicable
+if [[ -n $_max_size ]] || [[ -n $ZRAM_MAX_SIZE ]]; then
+  _max_size_set=true
+  _max_size=${_max_size:-$ZRAM_MAX_SIZE}
+  [[ $_max_size -gt 0 ]] \
+    || _max_size=$MAX_SIZE
+fi
 
 # sanitize streams input
 _streams=${_streams:-$ZRAM_STREAMS}
@@ -213,8 +215,11 @@ make() {
   _mem_total=$(awk '/MemTotal:/ {printf("%.0f",$2/1024)}' /proc/meminfo)
   _mem_to_alloc=$(awk -v size="$_size" '{printf("%.0f",$0*(size/100))}' <<< "$_mem_total")
 
-  if [[ $_mem_to_alloc -gt $_max_size ]]; then
-    _mem_to_alloc=$_max_size
+  # only enforce max size when specified
+  if [[ -n $_max_size_set ]]; then
+    if [[ $_mem_to_alloc -gt $_max_size ]]; then
+      _mem_to_alloc=$_max_size
+    fi
   fi
 
   if ! [[ -d '/sys/module/zram' ]]; then
