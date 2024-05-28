@@ -19,10 +19,10 @@ readonly ZRAM_PRIORITY="${ZRAM_PRIORITY:-$PRIORITY}"
 readonly SIZE=25
 readonly ZRAM_SIZE="${ZRAM_SIZE:-$SIZE}"
 
-# sets max size of zram in MiB
+# set maximum size of zram in MiB
 readonly MAX_SIZE=4096
 
-# set the maximum number of compression streams for zram
+# set maximum number of compression streams for zram
 readonly STREAMS=$(nproc)
 readonly ZRAM_STREAMS="${ZRAM_STREAMS:-$STREAMS}"
 
