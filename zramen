@@ -278,14 +278,13 @@ make() {
     mkdir -p "$WORK_DIR/zram"
 
     if [[ ! -z "$_backing_device" ]]; then
-      backing_device="/dev/$_backing_device"
-      if [[ -b "$backing_device" ]]; then
+      if [[ -b "$_backing_device" ]]; then
         echo 1 > /sys/block/$(basename "$_zram_dev")/reset \
-          && echo "$backing_device" > /sys/block/$(basename "$_zram_dev")/backing_dev \
-          && INFO "Successfully initialized zram backing device: $backing_device" \
+          && echo "$_backing_device" > /sys/block/$(basename "$_zram_dev")/backing_dev \
+          && INFO "Successfully initialized zram backing device: $_backing_device" \
           || WARN "Failed to write to /sys/block/$(basename "$_zram_dev")/backing_dev"
       else
-        WARN "failed to find backing device $backing_device"
+        WARN "failed to find backing device $_backing_device"
       fi
     else
       INFO "Continuing without any backing device"
